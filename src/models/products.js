@@ -4,6 +4,7 @@ const productSchema = new mongoose.Schema({
     name: {
         type: String,
         trim: true,
+        minLength: 12,
         required: true,
     },
     heart: {
@@ -26,6 +27,10 @@ const productSchema = new mongoose.Schema({
     price : {
         type: Number,
         required: true
+    },
+    rating: {
+        type: Number,
+        default: 3.7
     },
     owner: {
         type: mongoose.Schema.Types.ObjectId,

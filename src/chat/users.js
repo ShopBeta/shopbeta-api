@@ -3,7 +3,7 @@ const User = require('../models/user')
 
 const addUser = ({ id, username, room }) => {
     // Store user
-    const user = User
+    const user = User.findById({...req.body, id: req.params.id})
     users.push(user)
     return { user }
 }
@@ -22,7 +22,7 @@ const getUser = (id) => {
 
 const getUsersInRoom = (room) => {
     room = room.trim().toLowerCase()
-    return users.filter((user) => user.room === room)
+    return users.filter((user) => user.username === room)
 }
 
 module.exports = {

@@ -1,6 +1,6 @@
 const request = require('supertest')
-const app = require('../src/app')
-const User = require('../src/models/user')
+const app = require('../app')
+const User = require('../models/user')
 const { userOneId, userOne, setupDatabase } = require('./fixtures/db')
 
 beforeEach(setupDatabase)
@@ -10,7 +10,7 @@ test('Should signup a new user', async () => {
         username: 'Andrew',
         email: 'andrew@example.com',
         password: 'MyPass777!',
-        phonenumber: 08089997239
+        phonenumber: '08089997239'
     }).expect(201)
 
     // Assert that the database was changed correctly
@@ -23,7 +23,7 @@ test('Should signup a new user', async () => {
             username: 'Andrew',
             email: 'andrew@example.com'
         },
-        token: user.tokens[0].token
+        token: user.token[0].token
     })
     expect(user.password).not.toBe('MyPass777!')
 })
@@ -34,7 +34,7 @@ test('Should login existing user', async () => {
         password: userOne.password
     }).expect(200)
     const user = await User.findById(userOneId)
-    expect(response.body.token).toBe(user.tokens[1].token)
+    expect(response.body.token).toBe(user.token[1].token)
 })
 
 test('Should not login nonexistent user', async () => {
@@ -47,7 +47,7 @@ test('Should not login nonexistent user', async () => {
 test('Should get profile for user', async () => {
     await request(app)
         .get('/users/me')
-        .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+        .set('Authorization', `Bearer ${userOne.token[0].token}`)
         .send()
         .expect(200)
 })
@@ -62,7 +62,7 @@ test('Should not get profile for unauthenticated user', async () => {
 test('Should delete account for user', async () => {
     await request(app)
         .delete('/users/me')
-        .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+        .set('Authorization', `Bearer ${userOne.token[0].token}`)
         .send()
         .expect(200)
     const user = await User.findById(userOneId)
@@ -79,7 +79,7 @@ test('Should not delete account for unauthenticate user', async () => {
 test('Should upload avatar image', async () => {
     await request(app)
         .post('/users/me/avatar')
-        .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+        .set('Authorization', `Bearer ${userOne.token[0].token}`)
         .attach('avatar', 'tests/fixtures/profile-pic.jpg')
         .expect(200)
     const user = await User.findById(userOneId)
@@ -89,7 +89,7 @@ test('Should upload avatar image', async () => {
 test('Should update valid user fields', async () => {
     await request(app)
         .patch('/users/me')
-        .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+        .set('Authorization', `Bearer ${userOne.token[0].token}`)
         .send({
             username: 'Jess'
         })
@@ -101,7 +101,7 @@ test('Should update valid user fields', async () => {
 test('Should not update invalid user fields', async () => {
     await request(app)
         .patch('/users/me')
-        .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+        .set('Authorization', `Bearer ${userOne.token[0].token}`)
         .send({
             nickname: 'Philadelphia Q'
         })

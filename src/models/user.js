@@ -7,6 +7,7 @@ const Product = require('./products')
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
+        minLenght: 15,
         required: true,
         trim: true
     },
@@ -38,6 +39,13 @@ const userSchema = new mongoose.Schema({
         trim: true,
         required: true
     },
+    follow: {
+        type: Boolean,
+        default: false
+    },
+    followers: [{
+        type: Object
+    }],
     room: {
         type: String,
         trim: true,
@@ -56,7 +64,7 @@ const userSchema = new mongoose.Schema({
            return value.toLowerCase()
         }
     }, 
-    officialEmail: {
+    contactEmail: {
         type: String,
         trim: true,
         lowercase: true,
@@ -92,6 +100,12 @@ userSchema.virtual('feed', {
     foreignField: 'owner'
 })
 
+userSchema.virtual('cart', {
+    ref: 'Cart',
+    localField: '_id',
+    foreignField: 'owner'
+})
+
 userSchema.methods.toJSON = function () {
     const user = this
     const userObject = user.toObject()
@@ -99,6 +113,8 @@ userSchema.methods.toJSON = function () {
     delete userObject.password
     delete userObject.token
     delete userObject.avatar
+    // delete userObject.follow
+    // delete userObject.followers
 
     return userObject
 }

@@ -3,7 +3,7 @@ const multer = require('multer')
 const sharp = require('sharp')
 const User = require('../models/user')
 const auth = require('../middleware/auth')
-const { sendWelcomeEmail, sendCancelationEmail } = require('../emails/account')
+const { sendWelcomeEmail } = require('../emails/account')
 const router = new express.Router()
 
 router.post('/users', async (req, res) => {
@@ -11,7 +11,7 @@ router.post('/users', async (req, res) => {
 
     try {
         await user.save()
-        // sendWelcomeEmail(user.email, user.name)
+        sendWelcomeEmail(user.email, user.name)
         const token = await user.generateAuthToken()
         res.status(201).send({ user, token })
         console.log(user)
@@ -94,7 +94,6 @@ router.patch('/users/me', auth, async (req, res) => {
 router.delete('/users/me', auth, async (req, res) => {
     try {
         await req.user.remove()
-        sendCancelationEmail(req.user.email, req.user.name)
         res.send(req.user)
     } catch (e) {
         res.status(500).send()
@@ -143,6 +142,54 @@ router.get('/users/:id/avatar', async (req, res) => {
         res.send(user.avatar)
     } catch (e) {
         res.status(404).send()
+    }
+})
+
+
+// follow a User
+router.post('/user/:id/follow', auth, async (req, res) => {
+   
+    const userModel = User.findById({
+        ...req.body,
+        _id: req.params.id,
+    })
+
+    try {
+        const user = await userModel
+
+        if (!user) {
+            return res.status(404).send()
+        }
+        const updates = req.user
+        user.follow = true
+        user.followers.push(updates)
+        await user.save()
+        res.status(201).send(user)
+    } catch (e) {
+        res.status(400).send(e)
+    }
+})
+
+router.post('/user/:id/unfollow', auth, async (req, res) => {
+   
+    const userModel = User.findById({
+        ...req.body,
+        _id: req.params.id,
+    })
+
+    try {
+        const user = await userModel
+
+        if (!user) {
+            return res.status(404).send()
+        }
+        const updates = req.user
+        user.follow = false
+        user.followers.splice(updates)
+        await user.save()
+        res.status(201).send(user)
+    } catch (e) {
+        res.status(400).send(e)
     }
 })
 

@@ -1,20 +1,23 @@
 const express = require('express')
+const Cart = require('../models/cart')
 const Product = require('../models/products')
-const { sendNewProductEmail, sendDeleteProductEmail } = require('../emails/account')
+const auth = require('../middleware/auth')
 const router = new express.Router()
 
 //Add product to Cart
-router.post('/cart', auth, async (req, res) => {
-    const user = new User(req.body)
-    const product = new Product({
+router.post('/cart/:id', auth, async (req, res) => {
+    const product = Product.findById({
         ...req.body,
-        owner: req.user._id
+       _id: req.params.id
+    })
+    const cart = new Cart({
+        owner: req.user._id 
     })
 
     try {
-        await product.save()
-        // sendNewProductEmail(user.email, user.name)
-        res.status(201).send(product)
+        cart.product = (await product)
+        await cart.save()
+        res.status(201).send(cart)
     } catch (e) {
         res.status(400).send(e)
     }
@@ -25,24 +28,39 @@ router.post('/cart', auth, async (req, res) => {
   // Get all products in cart from database
   router.get('/cart', async (req, res) => {
     try {
-        const product = await Product.find({})
-        res.send(product)
+        const cart = await Cart.find({})
+        res.send(cart)
     } catch (e) {
         res.status(500).send(e)
     }
  })
 
+ //Delete product from cart
  router.delete('/cart/:id', auth, async (req, res) => {
     try {
-        const product = await Product.findOneAndDelete({ _id: req.params.id, owner: req.user._id })
+        const cart = await Cart.findOneAndDelete({ _id: req.params.id, owner: req.user._id })
 
-        if (!product) {
+        if (!cart) {
             res.status(404).send()
         }
 
-        res.send(product)
+        res.send(cart)
     } catch (e) {
         res.status(500).send()
+    }
+})
+
+router.delete('/cart/:id', auth, async (req, res) => {
+    try {
+        const cartItem = await Cart.findOneAndDelete({_id: req.params.id, owner: req.user._id })
+
+        if (!cartItem) {
+            res.status(404).send()
+        }
+        // sendDeleteProductEmail(req.user.email, req.user.name)
+        res.send(cartItem)
+    } catch (e) {
+        res.status(500).send(e)
     }
 })
 

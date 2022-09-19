@@ -1,3 +1,4 @@
+const server = require('../app')
 const socketio = require('socket.io')
 const Filter = require('bad-words')
 const io = socketio(server)

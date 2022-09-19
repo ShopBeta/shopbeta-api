@@ -4,11 +4,24 @@ const multer = require('multer')
 const sharp = require('sharp')
 const User = require('../models/user')
 const auth = require('../middleware/auth')
-const { sendNewProductEmail, sendDeleteProductEmail } = require('../emails/account')
 const router = new express.Router()
 
-//Get products you created
-router.post('/products', auth, async (req, res) => {
+
+const upload = multer({
+    limits: {
+        fileSize: 10000000
+    },
+    fileFilter(req, file, cb) {
+        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+            return cb(new Error('Please upload an image'))
+        }
+
+        cb(undefined, true)
+    }
+})
+
+//Create products
+router.post('/products', auth, upload.single('images'), async (req, res) => {
     const user = new User(req.body)
     const product = new Product({
         ...req.body,
@@ -16,14 +29,17 @@ router.post('/products', auth, async (req, res) => {
     })
 
     try {
+        const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
+        product.images = buffer
         await product.save()
-        // sendNewProductEmail(user.email, user.name)
         res.status(201).send(product)
     } catch (e) {
         res.status(400).send(e)
     }
 
- })
+ },(error, req, res, next) => {
+    res.status(400).send({ error: error.message })
+})
 
  // Get all global or public products from database
  router.get('/products', async (req, res) => {
@@ -35,9 +51,9 @@ router.post('/products', auth, async (req, res) => {
     }
  })
 
- // Get products via category "/products?category=fashion"
- // Get products via category "/products?limit=50&ship=50"
- //Get products via "/products?sortBy=createdAt:desc"
+ // Get products via category "/products?category="fashion"
+ // Get products via category "/products?limit="50"&ship="50"
+ //Get products via "/products?sortBy=createdAt:"desc"
  router.get('/products', auth, async (req, res) => {
     const match = {}
     const sort = {}
@@ -102,39 +118,34 @@ router.delete('/products/:id', auth, async (req, res) => {
         if (!product) {
             res.status(404).send()
         }
-        sendDeleteProductEmail(req.user.email, req.user.name)
         res.send(product)
     } catch (e) {
         res.status(500).send(e)
     }
 })
 
-// Upload profile photo
 
-const upload = multer({
-    limits: {
-        fileSize: 1000000
-    },
-    fileFilter(req, file, cb) {
-        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
-            return cb(new Error('Please upload an image'))
-        }
-
-        cb(undefined, true)
-    }
-})
-
-router.patch('/products/:id/images', auth, upload.single('images'), async (req, res) => {
-    const product = new Product({
+// POST hearts
+router.post('/product/:id/hearts', auth, async (req, res) => {
+   
+    const productModel = Product.findById({
         ...req.body,
-        owner: req.user._id
+        _id: req.params.id,
     })
-    const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
-    product.images = buffer
-    await product.save()
-    res.send()
-}, (error, req, res, next) => {
-    res.status(400).send({ error: error.message })
+
+    try {
+        const product = await productModel
+
+        if (!product) {
+            return res.status(404).send()
+        }
+        const updates = req.body.heart
+        product.heart = updates
+        await product.save()
+        res.status(201).send(product)
+    } catch (e) {
+        res.status(400).send(e)
+    }
 })
 
 module.exports = router
