@@ -19,9 +19,9 @@ const feedSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
-    media: {
+    media: [{
         type: Buffer
-    },
+    }],
     owner: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
