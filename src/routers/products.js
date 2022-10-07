@@ -54,7 +54,7 @@ router.post('/products', auth, upload.single('images'), async (req, res) => {
  // Get products via category "/products?category="fashion"
  // Get products via category "/products?limit="50"&ship="50"
  // Get products via "/products?sortBy=createdAt:"desc"
- router.get('/products', auth, async (req, res) => {
+ router.get('/products', async (req, res) => {
     const match = {}
     const sort = {}
 

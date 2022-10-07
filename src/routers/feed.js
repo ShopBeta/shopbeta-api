@@ -37,7 +37,7 @@ router.post('/feed', auth, upload.single('media'), async (req, res) => {
     res.status(400).send({ error: error.message })
 })
 
- router.get('/feed', auth, async (req, res) => {
+ router.get('/feed', async (req, res) => {
     try {
         const feed = await Feed.find({})
         res.send(feed)
