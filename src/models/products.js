@@ -28,6 +28,10 @@ const productSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    oldprice : {
+        type: Number,
+        required: true
+    },
     rating: {
         type: Number,
         default: 3.7
