@@ -202,4 +202,40 @@ router.post('/user/:id/unfollow', auth, async (req, res) => {
     }
 })
 
+router.get('/user/followers', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id)
+
+        if (!user || !user.followers) {
+            throw new Error()
+        }
+
+        res.send(user.followers)
+    } catch (e) {
+        res.status(404).send()
+    }
+})
+
+router.post('/users/:id/hearts', auth, async (req, res) => {
+   
+    const userModel = User.findById({
+        ...req.body,
+        _id: req.params.id,
+    })
+
+    try {
+        const user = await userModel
+
+        if (!user) {
+            return res.status(404).send()
+        }
+        const updates = req.body.hearts
+        user.hearts = updates
+        await user.save()
+        res.status(201).send(user)
+    } catch (e) {
+        res.status(400).send(e)
+    }
+})
+
 module.exports = router

@@ -39,6 +39,10 @@ const userSchema = new mongoose.Schema({
         trim: true,
         required: true
     },
+    hearts: {
+        type: Number,
+        default: 0
+    },
     follow: {
         type: Boolean,
         default: false
