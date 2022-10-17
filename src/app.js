@@ -7,10 +7,13 @@ const productRouter = require('./routers/products')
 const feedRouter = require('./routers/feed')
 const cartRouter = require('./routers/cart')
 const socketio = require('socket.io')
+const bodyParser = require("body-parser")
 
 const app = express()
 const server = http.createServer(app)
 
+app.use(express.urlencoded({ extended: true }))
+app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(cors())
 app.use(userRouter)
