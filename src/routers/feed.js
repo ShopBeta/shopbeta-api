@@ -26,7 +26,7 @@ router.post('/feed', auth, upload.single('media'), async (req, res) => {
     })
 
     try {
-        feed.media = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
+        // feed.media = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
         await feed.save()
         res.status(201).send(feed)
     } catch (e) {

@@ -4,7 +4,6 @@ const productSchema = new mongoose.Schema({
     name: {
         type: String,
         trim: true,
-        minLength: 12,
         required: true,
     },
     heart: {
@@ -12,7 +11,7 @@ const productSchema = new mongoose.Schema({
     },
     images: {
         type: Buffer,
-        required: true
+        // required: true
     },
     category: {
         type: String,
@@ -22,6 +21,7 @@ const productSchema = new mongoose.Schema({
     description: {
         type: String,
         trim: true,
+        minLength: 12,
         required: true
     },
     price : {

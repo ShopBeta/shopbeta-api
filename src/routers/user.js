@@ -32,7 +32,7 @@ router.post('/users/login', async (req, res) => {
 
 router.post('/users/logout', auth, async (req, res) => {
     try {
-        req.user.tokens = req.user.tokens.filter((token) => {
+        req.user.token = req.user.token.filter((token) => {
             return token.token !== req.token
         })
         await req.user.save()
@@ -45,7 +45,7 @@ router.post('/users/logout', auth, async (req, res) => {
 
 router.post('/users/logoutAll', auth, async (req, res) => {
     try {
-        req.user.tokens = []
+        req.user.token = []
         await req.user.save()
         res.send()
     } catch (e) {
@@ -84,7 +84,7 @@ router.get('/users/:id', async (req, res) => {
 
 router.patch('/users/me', auth, async (req, res) => {
     const updates = Object.keys(req.body)
-    const allowedUpdates = ['username', 'email', 'password', 'phonenumber', 'location', 'website', 'officialEmail', 'avatar']
+    const allowedUpdates = ['username', 'email', 'password', 'bio', 'phonenumber', 'location', 'website', 'contactEmail', 'avatar']
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
 
     if (!isValidOperation) {

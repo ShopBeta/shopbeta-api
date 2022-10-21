@@ -39,6 +39,10 @@ const userSchema = new mongoose.Schema({
         trim: true,
         required: true
     },
+    bio: {
+        type: String,
+        minLenght: 150
+    },
     hearts: {
         type: Number,
         default: 0
@@ -48,7 +52,8 @@ const userSchema = new mongoose.Schema({
         default: false
     },
     followers: [{
-        type: Object
+        type: Object,
+        default: 0
     }],
     room: {
         type: String,

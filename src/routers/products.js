@@ -29,8 +29,8 @@ router.post('/products', auth, upload.single('images'), async (req, res) => {
     })
 
     try {
-        const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
-        product.images = buffer
+        // const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
+        // product.images = buffer
         await product.save()
         res.status(201).send(product)
     } catch (e) {
