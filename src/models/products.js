@@ -7,7 +7,8 @@ const productSchema = new mongoose.Schema({
         required: true,
     },
     heart: {
-        type: Number
+        type: Number,
+        default: 0
     },
     images: {
         type: Buffer,
@@ -23,6 +24,9 @@ const productSchema = new mongoose.Schema({
         trim: true,
         minLength: 12,
         required: true
+    },
+    currency: {
+        type: String
     },
     price : {
         type: Number,
