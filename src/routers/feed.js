@@ -132,7 +132,7 @@ router.post('/feed/:id/comments', auth, upload2.single('file'), async (req, res)
         if (!feed) {
             return res.status(404).send()
         }
-        const updates = req.body.comments[0]
+        const updates = req.body
         // feed.comments[0].file = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()  
         // feed.comments.push(feed.comments[0])
         feed.comments.push(updates)

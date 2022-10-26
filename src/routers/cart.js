@@ -35,6 +35,25 @@ router.post('/cart/:id', auth, async (req, res) => {
     }
  })
 
+ 
+ router.get('/cart/:id', async (req, res) => {
+    const _id = req.params.id
+
+    try {
+        const cart = await Cart.findById(_id)
+
+        if (!cart) {
+            return res.status(404).send()
+        }
+
+        res.send(cart)
+    } catch (e) {
+       res.status(500).send()
+    }
+
+})
+
+
  //Delete product from cart
  router.delete('/cart/:id', auth, async (req, res) => {
     try {

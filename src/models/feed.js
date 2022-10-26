@@ -13,6 +13,10 @@ const feedSchema = new mongoose.Schema({
         },
         file: {
             type: Buffer
+        },
+        owner: {
+            type: mongoose.Schema.Types.ObjectId,
+            // required: true
         }
     }],
     hearts : {

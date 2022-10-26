@@ -86,7 +86,7 @@ router.post('/products', auth, upload.single('images'), async (req, res) => {
 // Get your product
  router.get('/products/me', auth, async (req, res) => {
     try {
-        await req.user.populate('products').execPopulate()
+        // await req.user.populate('product').execPopulate()
         res.send(req.user.product)
     } catch (e) {
         res.status(500).send()
