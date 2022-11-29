@@ -84,7 +84,7 @@ router.get('/users/:id', async (req, res) => {
 
 router.patch('/users/me', auth, async (req, res) => {
     const updates = Object.keys(req.body)
-    const allowedUpdates = ['username', 'email', 'password', 'bio', 'phonenumber', 'location', 'website', 'contactEmail', 'avatar']
+    const allowedUpdates = ['username', 'email', 'password', 'bio', 'phonenumber', 'location', 'website', 'contactEmail']
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
 
     if (!isValidOperation) {
@@ -124,11 +124,14 @@ const upload = multer({
     }
 })
 
-router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res) => {
+router.post('/users/:id/avatar', upload.single('avatar'), async (req, res) => {
+    const _id = req.params.id
+    const user = await User.findById(_id)
+
     const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
-    req.user.avatar = buffer
-    await req.user.save()
-    res.send()
+    user.avatar = buffer
+    await user.save()
+    res.redirect('https://shopbetaonline.herokuapp.com/assets/vendor/Profile')
 }, (error, req, res, next) => {
     res.status(400).send({ error: error.message })
 })
@@ -176,6 +179,20 @@ router.post('/user/:id/follow', auth, async (req, res) => {
         res.status(201).send(user)
     } catch (e) {
         res.status(400).send(e)
+    }
+})
+
+router.get('/users/:id/followers', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id)
+
+        if (!user || !user.followers) {
+            throw new Error()
+        }
+
+        res.send(user.followers)
+    } catch (e) {
+        res.status(404).send()
     }
 })
 

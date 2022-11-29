@@ -8,10 +8,10 @@ const router = new express.Router()
  // Upload profile media file for a feed
  const upload = multer({
     limits: {
-        fileSize: 10000000
+        fileSize: 100000000
     },
     fileFilter(req, file, cb) {
-        if (!file.originalname.match(/\.(jpg|jpeg|png|mp4)$/)) {
+        if (!file.originalname.match(/\.(jpg|jpeg|png|JPG|PNG|JPEG)$/)) {
             return cb(new Error('Please upload a supported file format'))
         }
 
@@ -19,16 +19,20 @@ const router = new express.Router()
     }
 })
 
-router.post('/feed', auth, upload.single('media'), async (req, res) => {
+router.post('/feed/:id', upload.single('media'), async (req, res) => {
     const feed = new Feed({
         ...req.body,
-        owner: req.user._id
+        owner: req.params.id
     })
+    console.log(feed)
 
     try {
-        // feed.media = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
+        const buffer = await sharp(req.file.buffer).png().toBuffer()
+        feed.media = buffer 
+
         await feed.save()
-        res.status(201).send(feed)
+        res.redirect('https://shopbetaonline.herokuapp.com/assets/Adbillboard')
+        // res.status(201).send(feed)
     } catch (e) {
         res.status(400).send(e)
     }
@@ -45,6 +49,21 @@ router.post('/feed', auth, upload.single('media'), async (req, res) => {
         res.status(500).send(e)
     }
  })
+
+ router.get('/feed/:id/media', async (req, res) => {
+    try {
+        const feed = await Feed.findById(req.params.id)
+       
+        if (!feed || !feed.media) {
+            throw new Error()
+        }
+
+        res.set('Content-Type', 'image/jpg')
+        res.send(feed.media)
+    } catch (e) {
+        res.status(404).send()
+    }
+})
 
  // GET /tasks?completed=true
 // GET /tasks?limit=10&skip=20
@@ -136,6 +155,7 @@ router.post('/feed/:id/comments', auth, upload2.single('file'), async (req, res)
         // feed.comments[0].file = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()  
         // feed.comments.push(feed.comments[0])
         feed.comments.push(updates)
+        
         await feed.save()
         res.status(201).send(feed)
     } catch (e) {

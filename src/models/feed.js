@@ -9,7 +9,14 @@ const feedSchema = new mongoose.Schema({
     comments: [{
         text: {
             type: String,
-            trim: true
+            trim: true,
+            time: {
+                type: Date,
+                default: Date.now
+            },
+            owner: {
+                type: mongoose.Schema.Types.ObjectId,
+            }
         },
         file: {
             type: Buffer
@@ -23,12 +30,16 @@ const feedSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
-    media: [{
+    media: {
         type: Buffer
-    }],
+    },
+    time: {
+        type: Date,
+        default: Date.now
+    },
     owner: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
+        // required: true,
         ref: 'User'
     }
 }, {

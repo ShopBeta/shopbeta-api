@@ -9,10 +9,10 @@ const router = new express.Router()
 
 const upload = multer({
     limits: {
-        fileSize: 10000000
+        fileSize: 100000000
     },
     fileFilter(req, file, cb) {
-        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+        if (!file.originalname.match(/\.(jpg|jpeg|png|JPG|PNG|JPEG)$/)) {
             return cb(new Error('Please upload an image'))
         }
 
@@ -21,18 +21,20 @@ const upload = multer({
 })
 
 //Create products
-router.post('/products', auth, upload.single('images'), async (req, res) => {
-    const user = new User(req.body)
+router.post('/products/:id', upload.single('images'), async (req, res) => {
     const product = new Product({
         ...req.body,
-        owner: req.user._id
-    })
-
+        owner: req.params.id
+    })        
+   
     try {
-        // const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
-        // product.images = buffer
+        console.log(req.file)
+        const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
+        product.images = buffer
+        
         await product.save()
-        res.status(201).send(product)
+        res.redirect('https://shopbetaonline.herokuapp.com/assets/vendor/MarketPlace')
+        // res.status(201).send(product)
     } catch (e) {
         res.status(400).send(e)
     }
@@ -41,8 +43,11 @@ router.post('/products', auth, upload.single('images'), async (req, res) => {
     res.status(400).send({ error: error.message })
 })
 
+
  // Get all global or public products from database
  router.get('/products', async (req, res) => {
+    const user = User(req.body)
+    console.log(user)
     try {
         const product = await Product.find({})
         res.send(product)
@@ -51,37 +56,52 @@ router.post('/products', auth, upload.single('images'), async (req, res) => {
     }
  })
 
- // Get products via category "/products?category="fashion"
- // Get products via category "/products?limit="50"&ship="50"
- // Get products via "/products?sortBy=createdAt:"desc"
- router.get('/products', async (req, res) => {
-    const match = {}
-    const sort = {}
-
-    if (req.query.category) {
-        match.category = req.query.category
-    }
-
-    if (req.query.sortBy) {
-        const parts = req.query.sortBy.split(':')
-        sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
-    }
-
+ router.get('/products/:id/images', async (req, res) => {
     try {
-        await req.product.populate({
-            path: 'products',
-            match,
-            options: {
-                limit: parseInt(req.query.limit),
-                skip: parseInt(req.query.skip),
-                sort
-            }
-        }).execPopulate()
-        res.send(req.product)
+        const product = await Product.findById(req.params.id)
+       
+        if (!product || !product.images) {
+            throw new Error()
+        }
+
+        res.set('Content-Type', 'image/jpg')
+        res.send(product.images)
     } catch (e) {
-        res.status(500).send()
+        res.status(404).send()
     }
 })
+
+//  // Get products via category "/products?category="fashion"
+//  // Get products via category "/products?limit="50"&ship="50"
+//  // Get products via "/products?sortBy=createdAt:"desc"
+//  router.get('/products', async (req, res) => {
+//     const match = {}
+//     const sort = {}
+
+//     if (req.query.category) {
+//         match.category = req.query.category
+//     }
+
+//     if (req.query.sortBy) {
+//         const parts = req.query.sortBy.split(':')
+//         sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
+//     }
+
+//     try {
+//         await req.product.populate({
+//             path: 'products',
+//             match,
+//             options: {
+//                 limit: parseInt(req.query.limit),
+//                 skip: parseInt(req.query.skip),
+//                 sort
+//             }
+//         }).execPopulate()
+//         res.send(req.product)
+//     } catch (e) {
+//         res.status(500).send()
+//     }
+// })
 
 // Get your product
  router.get('/products/me', auth, async (req, res) => {

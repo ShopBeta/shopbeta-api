@@ -6,16 +6,13 @@ const router = new express.Router()
 
 //Add product to Cart
 router.post('/cart/:id', auth, async (req, res) => {
-    const product = Product.findById({
-        ...req.body,
-       _id: req.params.id
-    })
     const cart = new Cart({
+        ...req.body,
         owner: req.user._id 
     })
 
     try {
-        cart.product = (await product)
+
         await cart.save()
         res.status(201).send(cart)
     } catch (e) {
@@ -23,7 +20,6 @@ router.post('/cart/:id', auth, async (req, res) => {
     }
 
  })
-
 
   // Get all products in cart from database
   router.get('/cart', async (req, res) => {
@@ -34,7 +30,6 @@ router.post('/cart/:id', auth, async (req, res) => {
         res.status(500).send(e)
     }
  })
-
  
  router.get('/cart/:id', async (req, res) => {
     const _id = req.params.id
@@ -52,7 +47,6 @@ router.post('/cart/:id', auth, async (req, res) => {
     }
 
 })
-
 
  //Delete product from cart
  router.delete('/cart/:id', auth, async (req, res) => {
