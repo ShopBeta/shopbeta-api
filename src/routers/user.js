@@ -6,6 +6,7 @@ const auth = require('../middleware/auth')
 // const { sendWelcomeEmail } = require('../emails/account')
 const router = new express.Router()
 
+
 router.post('/users', async (req, res) => {
     const user = new User(req.body)
 
@@ -94,7 +95,7 @@ router.patch('/users/me', auth, async (req, res) => {
     try {
         updates.forEach((update) => req.user[update] = req.body[update])
         await req.user.save()
-        res.redirect('https://shopbetaonline.herokuapp.com/assets/vendor/Profile')
+        res.send(req.user)
     } catch (e) {
         res.status(400).send(e)
     }
