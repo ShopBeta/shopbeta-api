@@ -20,7 +20,7 @@ const upload = multer({
     }
 })
 
-//Create products
+//  Create products
 router.post('/products/:id', upload.single('images'), async (req, res) => {
     const product = new Product({
         ...req.body,
@@ -28,7 +28,6 @@ router.post('/products/:id', upload.single('images'), async (req, res) => {
     })        
    
     try {
-        console.log(req.file)
         const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
         product.images = buffer
         
@@ -46,11 +45,9 @@ router.post('/products/:id', upload.single('images'), async (req, res) => {
 
  // Get all global or public products from database
  router.get('/products', async (req, res) => {
-    const user = User(req.body)
-    console.log(user)
     try {
         const product = await Product.find({})
-        res.send(product)
+        res.send(product.reverse())
     } catch (e) {
         res.status(500).send(e)
     }
@@ -104,7 +101,8 @@ router.post('/products/:id', upload.single('images'), async (req, res) => {
 // })
 
 // Get your product
- router.get('/products/me', auth, async (req, res) => {
+ 
+router.get('/products/me', auth, async (req, res) => {
     try {
         // await req.user.populate('product').execPopulate()
         res.send(req.user.product)

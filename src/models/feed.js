@@ -12,7 +12,7 @@ const feedSchema = new mongoose.Schema({
             trim: true,
             time: {
                 type: Date,
-                default: Date.now
+                default: Date.now()
             },
             owner: {
                 type: mongoose.Schema.Types.ObjectId,
@@ -35,7 +35,7 @@ const feedSchema = new mongoose.Schema({
     },
     time: {
         type: Date,
-        default: Date.now
+        default: Date.now()
     },
     owner: {
         type: mongoose.Schema.Types.ObjectId,

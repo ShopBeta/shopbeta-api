@@ -1,7 +1,7 @@
 const express = require('express')
 const multer = require('multer')
 const sharp = require('sharp')
-const User = require('../models/user')
+const { User } = require('../models/user')
 const auth = require('../middleware/auth')
 // const { sendWelcomeEmail } = require('../emails/account')
 const router = new express.Router()
@@ -11,11 +11,11 @@ router.post('/users', async (req, res) => {
     const user = new User(req.body)
 
     try {
+
         await user.save()
         // sendWelcomeEmail(user.email, user.name)
         const token = await user.generateAuthToken()
         res.status(201).send({ user, token })
-        console.log(user)
     } catch (e) {
         res.status(400).send(e)
     }
@@ -54,14 +54,14 @@ router.post('/users/logoutAll', auth, async (req, res) => {
     }
 })
 
-router.get('/users/me', auth, async (req, res) => {
+router.get('/users/fetchme', auth, async (req, res) => {
     res.send(req.user)
 })
 
 router.get('/users', async (req, res) => {
     try {
         const user = await User.find({})
-        res.send(user)
+        res.send(user.reverse())
     } catch (e) {
         res.status(500).send(e)
     }
@@ -83,7 +83,7 @@ router.get('/users/:id', async (req, res) => {
     }
 })
 
-router.patch('/users/me', auth, async (req, res) => {
+router.patch('/users/updateme', auth, async (req, res) => {
     const updates = Object.keys(req.body)
     const allowedUpdates = ['username', 'email', 'password', 'bio', 'phonenumber', 'location', 'website', 'contactEmail']
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
@@ -101,7 +101,7 @@ router.patch('/users/me', auth, async (req, res) => {
     }
 })
 
-router.delete('/users/me', auth, async (req, res) => {
+router.delete('/users/deleteme', auth, async (req, res) => {
     try {
         await req.user.remove()
         res.send(req.user)
@@ -111,7 +111,6 @@ router.delete('/users/me', auth, async (req, res) => {
 })
 
 // Upload profile photo
-
 const upload = multer({
     limits: {
         fileSize: 1000000
@@ -143,6 +142,18 @@ router.delete('/users/me/avatar', auth, async (req, res) => {
     res.send()
 })
 
+router.delete('users/:id', async (req, res) => {
+    try {
+      const user = await User.findByIdAndDelete(req.params.id);
+      return res.status(200).json({ 
+        success: true, 
+        message: `Deleted a count of ${user.deletedCount} user.` 
+      });
+    } catch (error) {
+      return res.status(500).json({ success: false, error: error })
+    }
+  })
+
 router.get('/users/:id/avatar', async (req, res) => {
     try {
         const user = await User.findById(req.params.id)
@@ -159,7 +170,7 @@ router.get('/users/:id/avatar', async (req, res) => {
 })
 
 
-// follow a User
+// Follow a user
 router.post('/user/:id/follow', auth, async (req, res) => {
    
     const userModel = User.findById({
@@ -174,8 +185,8 @@ router.post('/user/:id/follow', auth, async (req, res) => {
             return res.status(404).send()
         }
         const updates = req.user
-        user.follow = true
-        user.followers.push(updates)
+        updates.following.push(user._id)
+        user.followers.push(updates._id)
         await user.save()
         res.status(201).send(user)
     } catch (e) {
@@ -197,6 +208,20 @@ router.get('/users/:id/followers', async (req, res) => {
     }
 })
 
+router.get('/users/:id/following', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id)
+
+        if (!user || !user.following) {
+            throw new Error()
+        }
+
+        res.send(user.following)
+    } catch (e) {
+        res.status(404).send()
+    }
+})
+
 router.post('/user/:id/unfollow', auth, async (req, res) => {
    
     const userModel = User.findById({
@@ -211,26 +236,12 @@ router.post('/user/:id/unfollow', auth, async (req, res) => {
             return res.status(404).send()
         }
         const updates = req.user
-        user.follow = false
-        user.followers.splice(updates)
+        updates.following.splice(user._id)
+        user.followers.splice(updates._id)
         await user.save()
         res.status(201).send(user)
     } catch (e) {
         res.status(400).send(e)
-    }
-})
-
-router.get('/user/followers', async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id)
-
-        if (!user || !user.followers) {
-            throw new Error()
-        }
-
-        res.send(user.followers)
-    } catch (e) {
-        res.status(404).send()
     }
 })
 

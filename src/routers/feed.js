@@ -5,7 +5,7 @@ const multer = require('multer')
 const sharp = require('sharp')
 const router = new express.Router()
 
- // Upload profile media file for a feed
+ // Upload media file for a feed
  const upload = multer({
     limits: {
         fileSize: 100000000
@@ -44,7 +44,7 @@ router.post('/feed/:id', upload.single('media'), async (req, res) => {
  router.get('/feed', async (req, res) => {
     try {
         const feed = await Feed.find({})
-        res.send(feed)
+        res.send(feed.reverse())
     } catch (e) {
         res.status(500).send(e)
     }
@@ -65,9 +65,9 @@ router.post('/feed/:id', upload.single('media'), async (req, res) => {
     }
 })
 
- // GET /tasks?completed=true
-// GET /tasks?limit=10&skip=20
-// GET /tasks?sortBy=createdAt:desc
+// GET /feed?completed=true
+// GET /feed?limit=10&skip=20
+// GET /feed?sortBy=createdAt:desc
 router.get('/feed', auth, async (req, res) => {
     const match = {}
 
@@ -122,7 +122,7 @@ router.delete('/feed/:id', auth, async (req, res) => {
     }
 })
 
-//Upload media file as a comment
+//  Upload media file as a comment
 const upload2 = multer({
     limits: {
         fileSize: 10000000

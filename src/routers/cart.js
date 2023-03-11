@@ -4,7 +4,7 @@ const Product = require('../models/products')
 const auth = require('../middleware/auth')
 const router = new express.Router()
 
-//Add product to Cart
+//  Add product to Cart
 router.post('/cart/:id', auth, async (req, res) => {
     const cart = new Cart({
         ...req.body,
@@ -25,7 +25,7 @@ router.post('/cart/:id', auth, async (req, res) => {
   router.get('/cart', async (req, res) => {
     try {
         const cart = await Cart.find({})
-        res.send(cart)
+        res.send(cart.reverse())
     } catch (e) {
         res.status(500).send(e)
     }
@@ -48,7 +48,7 @@ router.post('/cart/:id', auth, async (req, res) => {
 
 })
 
- //Delete product from cart
+ // Delete product from cart
  router.delete('/cart/:id', auth, async (req, res) => {
     try {
         const cart = await Cart.findOneAndDelete({ _id: req.params.id, owner: req.user._id })

@@ -4,6 +4,11 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const Product = require('./products')
 
+const USER_TYPES = {
+    CONSUMER: "consumer",
+    SUPPORT: "support",
+}
+
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
@@ -47,21 +52,16 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    follow: {
-        type: Boolean,
-        default: false
-    },
+    following: [{
+        type: Object,
+        default: 0,
+        unique: true,
+    }],
     followers: [{
         type: Object,
-        default: 0
+        default: 0,
+        unique: true,
     }],
-    room: {
-        type: String,
-        trim: true,
-        validate(value) {
-            value.toLowerCase()
-        }
-    },
     location: {
         type: String,
         trim: true,
@@ -170,6 +170,63 @@ userSchema.pre('remove', async function(next) {
     next()
 })
 
+  
+  /**
+   * @param {String} id, user id
+   * @return {Object} User profile object
+   */
+  userSchema.statics.getUserById = async function (id) {
+    try {
+      const user = await this.findOne({ _id: id });
+      if (!user) throw ({ error: 'No user with this id found' });
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
+  
+  /**
+   * @return {Array} List of all users
+   */
+  userSchema.statics.getUsers = async function () {
+    try {
+      const users = await this.find();
+      return users;
+    } catch (error) {
+      throw error;
+    }
+  }
+  
+  /**
+   * @param {Array} ids, string of user ids
+   * @return {Array of Objects} users list
+   */
+  userSchema.statics.getUserByIds = async function (ids) {
+    try {
+      const users = await this.find({ _id: { $in: ids } });
+      return users;
+    } catch (error) {
+      throw error;
+    }
+  }
+  
+  /**
+   * @param {String} id - id of user
+   * @return {Object} - details of action performed
+   */
+  userSchema.statics.deleteByUserById = async function (id) {
+    try {
+      const result = await this.remove({ _id: id });
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+  
+
 const User = mongoose.model('User', userSchema )
 
-module.exports = User
+module.exports = {
+    User,
+    USER_TYPES
+}
