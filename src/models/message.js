@@ -31,6 +31,7 @@ const chatMessageSchema = new mongoose.Schema(
     message: mongoose.Schema.Types.Mixed,
     type: {
       type: String,
+      trim: true,
       default: () => MESSAGE_TYPES.TYPE_TEXT,
     },
     time: {

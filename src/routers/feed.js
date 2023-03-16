@@ -1,12 +1,14 @@
 const express = require('express')
-const Feed = require('../models/feed')
+const { Feed, Video } = require('../models/feed')
 const auth = require('../middleware/auth')
 const multer = require('multer')
 const sharp = require('sharp')
 const router = new express.Router()
 
- // Upload media file for a feed
- const upload = multer({
+// FEED ROUTERS
+
+ // upload media file for a feed
+ const imageUpload = multer({
     limits: {
         fileSize: 100000000
     },
@@ -19,7 +21,7 @@ const router = new express.Router()
     }
 })
 
-router.post('/feed/:id', upload.single('media'), async (req, res) => {
+router.post('/feed/:id', imageUpload.single('media'), async (req, res) => {
     const feed = new Feed({
         ...req.body,
         owner: req.params.id
@@ -90,23 +92,22 @@ router.get('/feed', auth, async (req, res) => {
     }
 })
 
+router.get('/feed/:id', auth, async (req, res) => {
+    const _id = req.params.id
 
- router.get('/feed/:id', auth, async (req, res) => {
-     const _id = req.params.id
+    try {
+        const feed = await Feed.findById(_id)
 
-     try {
-         const feed = await Feed.findById(_id)
+        if (!feed) {
+            return res.status(404).send()
+        }
 
-         if (!feed) {
-             return res.status(404).send()
-         }
-
-         res.send(feed)
-     } catch (e) {
+        res.send(feed)
+    } catch (e) {
         res.status(500).send()
-     }
+    }
 
- })
+})
 
 router.delete('/feed/:id', auth, async (req, res) => {
     try {
@@ -122,8 +123,8 @@ router.delete('/feed/:id', auth, async (req, res) => {
     }
 })
 
-//  Upload media file as a comment
-const upload2 = multer({
+//  upload media file as a comment
+const upload = multer({
     limits: {
         fileSize: 10000000
     },
@@ -136,9 +137,8 @@ const upload2 = multer({
     }
 })
 
-
-// POST comments
-router.post('/feed/:id/comments', auth, upload2.single('file'), async (req, res) => {
+// post comments
+router.post('/feed/:id/comments', auth, upload.single('file'), async (req, res) => {
    
     const feedModel = Feed.findById({
         ...req.body,
@@ -165,7 +165,6 @@ router.post('/feed/:id/comments', auth, upload2.single('file'), async (req, res)
     res.status(400).send({ error: error.message })
 })
 
-
 router.get('/feed/:id/comments', async (req, res) => {
     try {
         const feed = await Feed.findById(req.params.id)
@@ -181,7 +180,7 @@ router.get('/feed/:id/comments', async (req, res) => {
     }
 })
 
-// POST hearts
+// post hearts
 router.post('/feed/:id/hearts', auth, async (req, res) => {
    
     const feedModel = Feed.findById({
@@ -202,6 +201,163 @@ router.post('/feed/:id/hearts', auth, async (req, res) => {
     } catch (e) {
         res.status(400).send(e)
     }
+})
+
+
+// VIDEO ROUTERS
+
+const videoUpload = multer({
+     limits: {
+        fileSize: 20000000 // 10000000 Bytes = 10 MB
+     },
+    fileFilter(req, file, cb) {
+        if (!file.originalname.match(/\.(mp4|MPEG-4|mkv)$/)) {
+            return cb(new Error('Please upload a video supported file format'))
+        }
+
+        cb(undefined, true)
+    }
+})
+
+router.post('/video/:id', videoUpload.single('video'), async (req, res) => {
+    const video = new Video({
+        ...req.body,
+        owner: req.params.id
+    })
+    console.log(video)
+
+    try {
+        const buffer = await req.file.buffer
+        video.video = buffer 
+
+        await video.save()
+        res.redirect('https://shopbetaonline.herokuapp.com/assets/VideoSpace')
+        // res.send(video)
+    } catch (e) {
+        res.status(400).send(e)
+    }
+    
+ }, (error, req, res, next) => {
+    res.status(400).send({ error: error.message })
+})
+
+router.get('/video', async (req, res) => {
+    try {
+        const video = await Video.find({})
+        res.send(video.reverse())
+    } catch (e) {
+        res.status(500).send(e)
+    }
+})
+
+ router.get('/video/:id/video', async (req, res) => {
+    try {
+        const video = await Video.findById(req.params.id)
+       
+        if (!video || !video.video) {
+            throw new Error()
+        }
+
+        res.set('Content-Type', 'image/jpg')
+        res.send(video.video)
+    } catch (e) {
+        res.status(404).send()
+    }
+})
+
+router.get('/video/:id', auth, async (req, res) => {
+    const _id = req.params.id
+
+    try {
+        const video = await Video.findById(_id)
+
+        if (!video) {
+            return res.status(404).send()
+        }
+
+        res.send(video)
+    } catch (e) {
+       res.status(500).send()
+    }
+
+})
+
+router.delete('/video/:id', auth, async (req, res) => {
+   try {
+       const video = await Video.findByIdAndDelete(req.params.id)
+
+       if (!video) {
+           res.status(404).send()
+       }
+
+       res.send(video)
+   } catch (e) {
+       res.status(500).send(e)
+   }
+})
+
+// post comments
+router.post('/video/:id/comments', auth, async (req, res) => {
+  
+   const videoModel = Video.findById({
+       ...req.body,
+       _id: req.params.id,
+   })
+
+   try {
+       const video = await videoModel
+
+       if (!video) {
+           return res.status(404).send()
+       }
+       const updates = req.body
+       video.comments.push(updates)
+       
+       await video.save()
+       res.status(201).send(video)
+   } catch (e) {
+       res.status(400).send(e)
+   }
+}, (error, req, res, next) => {
+   res.status(400).send({ error: error.message })
+})
+
+router.get('/video/:id/comments', async (req, res) => {
+   try {
+       const video = await Video.findById(req.params.id)
+
+       if (!video || !video.comments) {
+           throw new Error()
+       }
+
+       res.set('Content-Type', 'image/jpg')
+       res.send(video.comments)
+   } catch (e) {
+       res.status(404).send()
+   }
+})
+
+// post hearts
+router.post('/video/:id/hearts', auth, async (req, res) => {
+  
+   const videoModel = Video.findById({
+       ...req.body,
+       _id: req.params.id,
+   })
+
+   try {
+       const video = await videoModel
+
+       if (!video) {
+           return res.status(404).send()
+       }
+       const updates = req.body.hearts
+       video.hearts = updates
+       await video.save()
+       res.status(201).send(video)
+   } catch (e) {
+       res.status(400).send(e)
+   }
 })
 
  

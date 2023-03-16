@@ -171,24 +171,24 @@ router.get('/users/:id/avatar', async (req, res) => {
 
 
 // Follow a user
-router.post('/user/:id/follow', auth, async (req, res) => {
+router.post('/user/:userId/follow/:id', async (req, res) => {
    
-    const userModel = User.findById({
-        ...req.body,
-        _id: req.params.id,
-    })
+    const userModel = User.findById(req.params.userId)
+    const userMe = User.getUserById(req.params.id)
 
     try {
         const user = await userModel
-
+        const me = await userMe
+       
         if (!user) {
             return res.status(404).send()
         }
-        const updates = req.user
-        updates.following.push(user._id)
-        user.followers.push(updates._id)
+        
+        me.following.push(req.params.userId)
+        user.followers.push(req.params.id)
         await user.save()
-        res.status(201).send(user)
+        await me.save()
+        res.status(200).send(me)
     } catch (e) {
         res.status(400).send(e)
     }
@@ -222,24 +222,24 @@ router.get('/users/:id/following', async (req, res) => {
     }
 })
 
-router.post('/user/:id/unfollow', auth, async (req, res) => {
-   
-    const userModel = User.findById({
-        ...req.body,
-        _id: req.params.id,
-    })
+router.post('/user/:userId/unfollow/:id', async (req, res) => {
+
+    const userModel = User.findById(req.params.userId)
+    const userMe = User.getUserById(req.params.id)
 
     try {
         const user = await userModel
-
+        const me = await userMe
+       
         if (!user) {
             return res.status(404).send()
         }
-        const updates = req.user
-        updates.following.splice(user._id)
-        user.followers.splice(updates._id)
+        
+        me.following.splice(req.params.userId)
+        user.followers.splice(req.params.id)
         await user.save()
-        res.status(201).send(user)
+        await me.save()
+        res.status(201).send(me)
     } catch (e) {
         res.status(400).send(e)
     }

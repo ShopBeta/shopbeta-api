@@ -5,13 +5,13 @@ const auth = require('../middleware/auth')
 const router = new express.Router()
 
 //  Add product to Cart
-router.post('/cart/:id', auth, async (req, res) => {
+router.post('/cart/:userId/product/:id', async (req, res) => {
     const cart = new Cart({
-        ...req.body,
-        owner: req.user._id 
+        owner: req.params.userId,
     })
 
     try {
+        cart.product = req.params.id
 
         await cart.save()
         res.status(201).send(cart)
