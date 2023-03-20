@@ -1,13 +1,13 @@
-// // const server = require("./app")
+const server = require("./app")
 // const serverapp = require("..api/app")
-// // const port = process.env.PORT || 3000
+const port = process.env.PORT || 3000
 
-// // // setInterval(function() {
-// // //     server.get("https://shopbeta-app.herokuapp.com");
-// // // }, 300000); // every 5 minutes (300000)
+// setInterval(function() {
+//     server.get("https://shopbeta-app.herokuapp.com");
+// }, 300000); // every 5 minutes (300000)
 
-// // server.listen(port, (err) => {
-// //     console.log(`Server is on port ${port}`)
-// // })
+server.listen(port, (err) => {
+    console.log(`Server is on port ${port}`)
+})
 
 // module.exports.handler = serverapp

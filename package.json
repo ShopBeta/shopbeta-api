@@ -5,7 +5,7 @@
   "scripts": {
     "test": "env-cmd -f ./config/test.env jest --watch --runInBand",
     "build": "netlify deploy --prod",
-    "start": "env-cmd -f ./config/dev.env netlify dev",
+    "start": "node src/index.js",
     "dev": "env-cmd -f ./config/dev.env nodemon src/index.js"
   },
   "jest": {
