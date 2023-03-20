@@ -231,7 +231,7 @@ router.post('/video/:id', videoUpload.single('video'), async (req, res) => {
         video.video = buffer 
 
         await video.save()
-        res.redirect('https://shopbetaonline.herokuapp.com/assets/VideoSpace')
+        res.redirect('https://shopbeta-online.netlify.app/assets/VideoSpace')
         // res.send(video)
     } catch (e) {
         res.status(400).send(e)
