@@ -16,17 +16,17 @@ const app = express()
 const server = http.createServer(app)
 // const serverapp = serverless(app)
 
-// const router = new express.Router()
+const router = new express.Router()
 
-// router.get('/', cors(), (req, res) => {
-//     res.json(
-//         {
-//             'id': '001',
-//             'name': 'Smith',
-//             'email': 'smith@gmail.com'
-//         }
-//     )
-// })
+router.get('/', cors(), (req, res) => {
+    res.json(
+        {
+            'id': '001',
+            'name': 'Smith',
+            'email': 'smith@gmail.com'
+        }
+    )
+})
 
 app.use(express.urlencoded({ extended: true }))
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -42,5 +42,5 @@ app.use(chatRouter)
 global.io = socketio(server);
 global.io.on('connection', WebSockets.connection)
 
-module.exports = server
-// module.exports.handler = serverapp
+// module.exports = server
+module.exports.handler = serverless(app)
