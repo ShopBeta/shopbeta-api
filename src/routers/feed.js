@@ -92,7 +92,7 @@ router.get('/feed', auth, async (req, res) => {
     }
 })
 
-router.get('/feed/:id', auth, async (req, res) => {
+router.get('/feed/:id', async (req, res) => {
     const _id = req.params.id
 
     try {
