@@ -33,7 +33,7 @@ router.post('/feed/:id', imageUpload.single('media'), async (req, res) => {
         feed.media = buffer 
 
         await feed.save()
-        res.redirect('https://shopbetaonline.herokuapp.com/assets/Adbillboard')
+        res.redirect('https://shopbeta-online.netlify.app/assets/Adbillboard')
         // res.status(201).send(feed)
     } catch (e) {
         res.status(400).send(e)
