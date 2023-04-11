@@ -32,7 +32,7 @@ router.post('/products/:id', imageUploads.array('images', 4), async (req, res) =
         product.images = buffer
         
         await product.save()
-        res.redirect('https://shopbeta-online.netlify.app/assets/vendor/MarketPlace')
+        res.redirect('https://shopbeta-online.onrender.com/assets/vendor/MarketPlace')
         // res.status(201).send(product)
     } catch (e) {
         res.status(400).send(e)

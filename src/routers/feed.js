@@ -33,7 +33,7 @@ router.post('/feed/:id', imageUpload.single('media'), async (req, res) => {
         feed.media = buffer 
 
         await feed.save()
-        res.redirect('https://shopbeta-online.netlify.app/assets/Adbillboard')
+        res.redirect('https://shopbeta-online.onrender.com/assets/Adbillboard')
         // res.status(201).send(feed)
     } catch (e) {
         res.status(400).send(e)
@@ -231,7 +231,7 @@ router.post('/video/:id', videoUpload.single('video'), async (req, res) => {
         video.video = buffer 
 
         await video.save()
-        res.redirect('https://shopbeta-online.netlify.app/assets/VideoSpace')
+        res.redirect('https://shopbeta-online.onrender.com/assets/VideoSpace')
         // res.send(video)
     } catch (e) {
         res.status(400).send(e)

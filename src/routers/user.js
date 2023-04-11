@@ -16,6 +16,7 @@ router.post('/users', async (req, res) => {
         // sendWelcomeEmail(user.email, user.name)
         const token = await user.generateAuthToken()
         res.status(201).send({ user, token })
+        console.log(user)
     } catch (e) {
         res.status(400).send(e)
     }
@@ -26,6 +27,7 @@ router.post('/users/login', async (req, res) => {
         const user = await User.findByCredentials(req.body.email, req.body.password)
         const token = await user.generateAuthToken()
         res.send({ user, token })
+        console.log(user)
     } catch (e) {
         res.status(400).send()
     }
@@ -131,7 +133,7 @@ router.post('/users/:id/avatar', upload.single('avatar'), async (req, res) => {
     const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
     user.avatar = buffer
     await user.save()
-    res.redirect('https://shopbeta-online.netlify.app/assets/vendor/Profile')
+    res.redirect('https://shopbeta-online.onrender.com/assets/vendor/Profile')
 }, (error, req, res, next) => {
     res.status(400).send({ error: error.message })
 })
