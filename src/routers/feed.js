@@ -138,12 +138,10 @@ const upload = multer({
 })
 
 // post comments
-router.post('/feed/:id/comments', auth, upload.single('file'), async (req, res) => {
+router.post('/feed/:id/comments', upload.single('file'), async (req, res) => {
+    const _id = req.params.id
    
-    const feedModel = Feed.findById({
-        ...req.body,
-        _id: req.params.id,
-    })
+    const feedModel = Feed.findById(_id)
 
     try {
         const feed = await feedModel
@@ -265,7 +263,7 @@ router.get('/video', async (req, res) => {
     }
 })
 
-router.get('/video/:id', auth, async (req, res) => {
+router.get('/video/:id', async (req, res) => {
     const _id = req.params.id
 
     try {
@@ -297,12 +295,11 @@ router.delete('/video/:id', auth, async (req, res) => {
 })
 
 // post comments
-router.post('/video/:id/comments', auth, async (req, res) => {
+router.post('/video/:id/comments', async (req, res) => {
   
-   const videoModel = Video.findById({
-       ...req.body,
-       _id: req.params.id,
-   })
+    const _id = req.params.id
+   
+    const videoModel = Video.findById(_id)
 
    try {
        const video = await videoModel
