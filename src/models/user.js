@@ -52,12 +52,12 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    following: [{
+    following: {
         type: Array,
-    }],
-    followers:[{
+    },
+    followers:{
         type: Array,
-    }],
+    },
     location: {
         type: String,
         trim: true,
