@@ -75,6 +75,10 @@ const videoSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
+    views : {
+        type: Number,
+        default: 0,
+    },
     video: {
         type: Buffer
     },

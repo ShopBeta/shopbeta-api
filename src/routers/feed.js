@@ -181,10 +181,7 @@ router.get('/feed/:id/comments', async (req, res) => {
 // post hearts
 router.post('/feed/:id/hearts', auth, async (req, res) => {
    
-    const feedModel = Feed.findById({
-        ...req.body,
-        _id: req.params.id,
-    })
+    const feedModel = Feed.findById(req.params.id)
 
     try {
         const feed = await feedModel
@@ -336,11 +333,9 @@ router.get('/video/:id/comments', async (req, res) => {
 
 // post hearts
 router.post('/video/:id/hearts', auth, async (req, res) => {
-  
-   const videoModel = Video.findById({
-       ...req.body,
-       _id: req.params.id,
-   })
+    const _id = req.params.id
+   
+    const videoModel = Video.findById(_id)
 
    try {
        const video = await videoModel
@@ -356,6 +351,28 @@ router.post('/video/:id/hearts', auth, async (req, res) => {
        res.status(400).send(e)
    }
 })
+
+// post views
+router.post('/video/:id/views', auth, async (req, res) => {
+  
+    const _id = req.params.id
+   
+    const videoModel = Video.findById(_id)
+ 
+    try {
+        const video = await videoModel
+ 
+        if (!video) {
+            return res.status(404).send()
+        }
+        const updates = req.body.views
+        video.views = updates
+        await video.save()
+        res.status(201).send(video)
+    } catch (e) {
+        res.status(400).send(e)
+    }
+ })
 
  
 module.exports = router

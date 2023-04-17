@@ -52,12 +52,12 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    following: [{
-        type: Array,
-    }],
-    followers:[{
-        type: Array,
-    }],
+    following: {
+        type: Array
+    },
+    followers:{
+        type: Array
+    },
     location: {
         type: String,
         trim: true,
@@ -118,6 +118,7 @@ userSchema.methods.toJSON = function () {
     delete userObject.password
     delete userObject.token
     delete userObject.followers
+    delete userObject.following
 
     return userObject
 }

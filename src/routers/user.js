@@ -183,7 +183,7 @@ router.post('/user/:userId/follow/:id', async (req, res) => {
         const user = await userModel
         const me = await userMe
        
-        if (!user) {
+        if (!user || !me) {
             return res.status(404).send()
         }
         
@@ -234,7 +234,7 @@ router.post('/user/:userId/unfollow/:id', async (req, res) => {
         const user = await userModel
         const me = await userMe
        
-        if (!user) {
+        if (!user || !me) {
             return res.status(404).send()
         }
         
