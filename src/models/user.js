@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         minLenght: 7,
-        trim: true,
+        trim: true, 
         validate(value) {
             if (value.toLowerCase().includes('password')) {
                 throw new Error('Password cannot contain "password"')
@@ -53,10 +53,12 @@ const userSchema = new mongoose.Schema({
         default: 0
     },
     following: {
-        type: Array
+        type: Array,
+        default: undefined
     },
     followers:{
-        type: Array
+        type: Array,
+        default: undefined
     },
     location: {
         type: String,
@@ -101,6 +103,12 @@ userSchema.virtual('products', {
 
 userSchema.virtual('feed', {
     ref: 'Feed',
+    localField: '_id',
+    foreignField: 'owner'
+})
+
+userSchema.virtual('video', {
+    ref: 'Video',
     localField: '_id',
     foreignField: 'owner'
 })
