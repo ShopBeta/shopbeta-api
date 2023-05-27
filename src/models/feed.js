@@ -95,23 +95,23 @@ const videoSchema = new mongoose.Schema({
     timestamps: true
 })
 
-feedSchema.statics.getFeedsByUserId = async function (userId) {
-    try {
-      const products = await this.find({ owner: { $all: [userId] } });
-      return products;
-    } catch (error) {
-      throw error;
-    }
-  }
+// feedSchema.statics.getFeedsByUserId = async function (userId) {
+//     try {
+//       const products = await this.find({ owner: { $all: [userId] } });
+//       return products;
+//     } catch (error) {
+//       throw error;
+//     }
+//   }
 
-videoSchema.statics.getVideosByUserId = async function (userId) {
-    try {
-      const products = await this.find({ owner: { $all: [userId] } });
-      return products;
-    } catch (error) {
-      throw error;
-    }
-  }
+// videoSchema.statics.getVideosByUserId = async function (userId) {
+//     try {
+//       const products = await this.find({ owner: { $all: [userId] } });
+//       return products;
+//     } catch (error) {
+//       throw error;
+//     }
+//   }
 
 
 const Feed = mongoose.model('Feed', feedSchema)

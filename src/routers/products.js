@@ -119,17 +119,17 @@ router.get('/products/:id/images-4', async (req, res) => {
 })
 
 // get user's personal products
-router.get('/products/:userId', async (req, res) => {
-    try {
-        const userId = req.params.userId
+// router.get('/products/:userId', async (req, res) => {
+//     try {
+//         const userId = req.params.userId
 
-        const product = await Product.getProductsByUserId(userId)
+//         const product = await Product.getProductsByUserId(userId)
 
-        res.send(product)
-    } catch (e) {
-        res.status(500).send()
-    }
-})
+//         res.send(product)
+//     } catch (e) {
+//         res.status(500).send()
+//     }
+// })
 
  router.get('/products/:id', async (req, res) => {
      const _id = req.params.id

@@ -49,14 +49,14 @@ const productSchema = new mongoose.Schema({
     timestamps: true
 })
 
-productSchema.statics.getProductsByUserId = async function (userId) {
-    try {
-      const products = await this.find({ owner: { $all: [userId] } });
-      return products;
-    } catch (error) {
-      throw error;
-    }
-  }
+// productSchema.statics.getProductsByUserId = async function (userId) {
+//     try {
+//       const products = await this.find({ owner: { $all: [userId] } });
+//       return products;
+//     } catch (error) {
+//       throw error;
+//     }
+//   }
 
 const Product = mongoose.model('Product', productSchema)
 

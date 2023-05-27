@@ -52,17 +52,17 @@ router.get('/feed', async (req, res) => {
     }
 })
 
-router.get('/feed/:userId', async (req, res) => {
-    try {
-        const userId = req.params.userId
+// router.get('/feed/:userId', async (req, res) => {
+//     try {
+//         const userId = req.params.userId
 
-        const feed = await Feed.getFeedsByUserId(userId)
+//         const feed = await Feed.getFeedsByUserId(userId)
 
-        res.send(feed.reverse())
-    } catch (e) {
-        res.status(500).send(e)
-    }
-})
+//         res.send(feed.reverse())
+//     } catch (e) {
+//         res.status(500).send(e)
+//     }
+// })
 
 router.get('/feed/:id/media', async (req, res) => {
     try {
@@ -259,17 +259,17 @@ router.get('/video', async (req, res) => {
     }
 })
 
-router.get('/video/:userId', async (req, res) => {
-    try {
-        const userId = req.params.userId
+// router.get('/video/:userId', async (req, res) => {
+//     try {
+//         const userId = req.params.userId
 
-        const video = await Video.getVideosByUserId(userId)
+//         const video = await Video.getVideosByUserId(userId)
 
-        res.send(video.reverse())
-    } catch (e) {
-        res.status(500).send(e)
-    }
-})
+//         res.send(video.reverse())
+//     } catch (e) {
+//         res.status(500).send(e)
+//     }
+// })
 
 router.get('/video/:id/video', async (req, res) => {
     try {
