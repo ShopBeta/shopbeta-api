@@ -4,7 +4,7 @@ const productSchema = new mongoose.Schema({
     name: {
         type: String,
         trim: true,
-        required: true,
+        // required: true,
     },
     heart: {
         type: Number,
@@ -12,29 +12,29 @@ const productSchema = new mongoose.Schema({
     },
     images: {
         type: Array,
-        required: true
+        // required: true
     },
     category: {
         type: String,
         trim: true,
-        required: true
+        // required: true
     },
     description: {
         type: String,
         trim: true,
         minLength: 12,
-        required: true
+        // required: true
     },
     currency: {
         type: String
     },
     price : {
         type: Number,
-        required: true
+        // required: true
     },
     oldprice : {
         type: Number,
-        required: true
+        // required: true
     },
     rating: {
         type: Number,
@@ -48,6 +48,15 @@ const productSchema = new mongoose.Schema({
 }, {
     timestamps: true
 })
+
+productSchema.statics.getProductsByUserId = async function (userId) {
+    try {
+      const products = await this.find({ owner: { $all: [userId] } });
+      return products;
+    } catch (error) {
+      throw error;
+    }
+  }
 
 const Product = mongoose.model('Product', productSchema)
 

@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.get('/chat/:userId', async (req, res) => {
   try {
-    const currentLoggedUser = req.params.id  //'634e857e9e6d457076be6386'
+    const currentLoggedUser = req.params.userId
 
     const options = {
       page: parseInt(req.query.page) || 0,
@@ -34,7 +34,7 @@ router.get('/chat/:userId', async (req, res) => {
 
 router.get('/chat/messages/:roomId', async (req, res) => {
   try {
-    const { roomId } = req.params;
+    const { roomId } = req.params.roomId;
     const room = await ChatRoom.getChatRoomByRoomId(roomId)
     if (!room) {
       return res.status(400).json({
@@ -65,7 +65,7 @@ router.get('/chat/messages/:roomId', async (req, res) => {
 
 router.get('/chat/:roomId/users', async (req, res) => {
   try {
-    const { roomId } = req.params;
+    const { roomId } = req.params.roomId;
     const room = await ChatRoom.getChatRoomByRoomId(roomId)
     if (!room) {
       return res.status(400).json({
@@ -106,9 +106,9 @@ router.post('/chat/initiate', async (req, res) => {
     }
 })
 
-router.post('/chat/:roomId/message/:id', async (req, res) => {
+router.post('/chat/:roomId/message/:userId', async (req, res) => {
   try {
-    const { roomId } = req.params;
+    const { roomId } = req.params.roomId;
     const validation = makeValidation(types => ({
       payload: req.body,
       checks: {
@@ -120,7 +120,7 @@ router.post('/chat/:roomId/message/:id', async (req, res) => {
     const messagePayload = {
       messageText: req.body.messageText,
     }
-    const currentLoggedUser = req.params.id
+    const currentLoggedUser = req.params.userId
 
     const post = await ChatMessage.createPostInChatRoom(roomId, messagePayload, currentLoggedUser);
     global.io.sockets.in(roomId).emit('new message', { message: post });
@@ -132,7 +132,7 @@ router.post('/chat/:roomId/message/:id', async (req, res) => {
 
 router.put('/chat/:roomId/mark-read/:id', async (req, res) => {
   try {
-    const { roomId } = req.params;
+    const { roomId } = req.params.roomId;
     const room = await ChatRoom.getChatRoomByRoomId(roomId)
     if (!room) {
       return res.status(400).json({
@@ -152,7 +152,7 @@ router.put('/chat/:roomId/mark-read/:id', async (req, res) => {
 
 router.delete('/room/:roomId', async (req, res) => {
   try {
-    const { roomId } = req.params;
+    const { roomId } = req.params.roomId;
     const room = await ChatRoom.remove({ _id: roomId })
     const messages = await ChatMessage.remove({ chatRoomId: roomId })
     return res.status(200).json({ 
@@ -168,7 +168,7 @@ router.delete('/room/:roomId', async (req, res) => {
 
 router.delete('/message/:messageId',  async (req, res) => {
 try {
-  const { messageId } = req.params;
+  const { messageId } = req.params.messageId;
   const message = await ChatMessage.remove({ _id: messageId })
   return res.status(200).json({ 
     success: true, 

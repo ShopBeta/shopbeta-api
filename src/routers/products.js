@@ -4,6 +4,7 @@ const multer = require('multer')
 const sharp = require('sharp')
 const User = require('../models/user')
 const auth = require('../middleware/auth')
+const { DeleteProductEmail } = require('../emails/account')
 const router = new express.Router()
 
 
@@ -85,7 +86,7 @@ router.get('/products/:id/images-2', async (req, res) => {
     }
 })
 
-router.get('/products/:id/image-3', async (req, res) => {
+router.get('/products/:id/images-3', async (req, res) => {
     try {
         const product = await Product.findById(req.params.id)
        
@@ -117,49 +118,18 @@ router.get('/products/:id/images-4', async (req, res) => {
     }
 })
 
-// Get products via category "/products?category="fashion"
-// Get products via category "/products?limit="50"&ship="50"
-// Get products via "/products?sortBy=createdAt:"desc"
-// router.get('/products', async (req, res) => {
-//     const match = {}
-//     const sort = {}
-
-//     if (req.query.category) {
-//         match.category = req.query.category
-//     }
-
-//     if (req.query.sortBy) {
-//         const parts = req.query.sortBy.split(':')
-//         sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
-//     }
-
-//     try {
-//         await req.product.populate({
-//             path: 'products',
-//             match,
-//             options: {
-//                 limit: parseInt(req.query.limit),
-//                 skip: parseInt(req.query.skip),
-//                 sort
-//             }
-//         }).execPopulate()
-//         res.send(req.product)
-//     } catch (e) {
-//         res.status(500).send()
-//     }
-// })
-
-// Get your product
- 
-router.get('/products/me', auth, async (req, res) => {
+// get user's personal products
+router.get('/products/:userId', async (req, res) => {
     try {
-        // await req.user.populate('product').execPopulate()
-        res.send(req.user.product)
+        const userId = req.params.userId
+
+        const product = await Product.getProductsByUserId(userId)
+
+        res.send(product)
     } catch (e) {
         res.status(500).send()
     }
 })
-
 
  router.get('/products/:id', async (req, res) => {
      const _id = req.params.id
@@ -185,6 +155,8 @@ router.delete('/products/:id', auth, async (req, res) => {
         if (!product) {
             res.status(404).send()
         }
+
+        // DeleteProductEmail()
         res.send(product)
     } catch (e) {
         res.status(500).send(e)
@@ -193,12 +165,11 @@ router.delete('/products/:id', auth, async (req, res) => {
 
 
 // POST hearts
-router.post('/product/:id/hearts', auth, async (req, res) => {
+router.post('/product/:id/hearts', async (req, res) => {
    
-    const productModel = Product.findById({
-        ...req.body,
-        _id: req.params.id,
-    })
+    const  _id = req.params.id
+
+    const productModel = Product.findById(_id)
 
     try {
         const product = await productModel
@@ -206,10 +177,12 @@ router.post('/product/:id/hearts', auth, async (req, res) => {
         if (!product) {
             return res.status(404).send()
         }
+
         const updates = req.body.heart
         product.heart = updates
+        
         await product.save()
-        res.status(201).send(product)
+        res.status(200).send(product.heart)
     } catch (e) {
         res.status(400).send(e)
     }

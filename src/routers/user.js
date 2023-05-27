@@ -1,36 +1,58 @@
 const express = require('express')
 const multer = require('multer')
+const bcrypt = require('bcryptjs')
 const sharp = require('sharp')
 const { User } = require('../models/user')
 const auth = require('../middleware/auth')
-// const { sendWelcomeEmail } = require('../emails/account')
+const { resetPasswordEmail, WelcomeEmail, CancelationEmail, passwordSuccessEmail } = require('../emails/account')
 const router = new express.Router()
 
-
+// register new user
 router.post('/users/signup', async (req, res) => {
     const user = new User(req.body)
+    const email = req.body.email;
 
     try {
+        
+        // check if user with email already exist
+        const check = await User.findOne({ email })
+        console.log(check)
+        if (check) {
+          return res.status(403).json({
+            status: "fail",
+            message: "User with email already exist"
+          })
+        }
 
         await user.save()
-        // sendWelcomeEmail(user.email, user.name)
+        //WelcomeEmail(user.email, user.name)
         const token = await user.generateAuthToken()
         res.status(201).send({ user, token })
-    } catch (e) {
-        res.status(400).send(e)
+    } catch (error) {
+        res.status(400).json({ success: false, error: error })
     }
 })
 
+// login user
 router.post('/users/login', async (req, res) => {
     try {
         const user = await User.findByCredentials(req.body.email, req.body.password)
         const token = await user.generateAuthToken()
+
+          if (!user) {
+            return res.status(400).json({
+              status: "fail",
+              message: "User is not registered"
+            })
+          }
+
         res.send({ user, token })
     } catch (e) {
-        res.status(400).send()
+        res.status(400).json({ success: false, message: "Unable to login, try again!" })
     }
 })
 
+// logout user
 router.post('/users/logout', auth, async (req, res) => {
     try {
         req.user.token = req.user.token.filter((token) => {
@@ -44,6 +66,7 @@ router.post('/users/logout', auth, async (req, res) => {
     }
 })
 
+// logout user from every devices logged in from 
 router.post('/users/logoutAll', auth, async (req, res) => {
     try {
         req.user.token = []
@@ -51,6 +74,90 @@ router.post('/users/logoutAll', auth, async (req, res) => {
         res.send()
     } catch (e) {
         res.status(500).send()
+    }
+})
+
+router.post('/users/forgotPassword', async (req, res) => {
+
+    try {
+        const { email } = req.body
+        const user = await User.findOne({email})  
+          
+        if (!user) {
+            return res.status(404).send("There is no user with this email")
+        }
+          
+        await user.save()
+        res.status(200).send(user)
+                
+        // resetPasswordEmail(user.email)
+        
+    } catch (e) {
+        res.status(500).send(e)
+    }
+})
+
+router.post('/users/resetPassword/:id', async (req, res) => {
+    try {
+  
+        const { password } = req.body
+        const _id = req.params.id
+          
+        const user = await User.findOne({ _id })
+          
+        if (!user) {
+            return res.send(500).send("User does not exist")
+        }
+          
+        // const hashedPassword = await bcrypt.hash(password, 12)
+          
+        user.password = password
+        console.log(user.password)
+        user.save()
+
+        // passwordSuccessEmail(user.email, user.name)
+          
+        res.status(200).json({
+            status: 'success',
+            message: 'Password updated successfully!!!'
+        })
+
+    } catch (e) {
+        res.status(500).send(e)
+    }
+})
+
+router.post('/users/changePassword/:id', async (req, res) => {
+    try {
+  
+        const { newPassword, oldPassword } = req.body
+        const _id = request.params.id
+
+        const user = await User.findOne({ _id })
+        console.log(_id)
+    
+        if (!user) {
+            return res.status(500).send("User does not exist")
+        }
+    
+        const correctPassword = await bcrypt.compare(oldPassword, user.password)
+    
+        if (!correctPassword) {
+            return res.status(400).send("Old password is incorrect, try again!")
+        }
+    
+        // const hashedPassword = await bcrypt.hash(newPassword, 12)
+
+        user.password = newPassword
+        user.save()
+    
+        res.status(200).json({
+        status: "success",
+        message: "Password updated successfully!"
+        })
+
+    } catch (e) {
+        res.status(500).send(`Couldn't update new password!`)
     }
 })
 
@@ -88,7 +195,7 @@ router.patch('/users/update/:id', async (req, res) => {
 
     const user = await User.findById(_id)
     const updates = Object.keys(req.body)
-    const allowedUpdates = ['username', 'email', 'password', 'bio', 'phonenumber', 'location', 'website', 'contactEmail']
+    const allowedUpdates = ['username', 'email', 'bio', 'phonenumber', 'location', 'website', 'contactEmail']
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
 
     if (!isValidOperation) {
@@ -175,22 +282,24 @@ router.get('/users/:id/avatar', async (req, res) => {
 
 // Follow a user
 router.post('/user/:userId/follow/:id', async (req, res) => {
-   
+
     const userModel = User.findById(req.params.userId)
     const userMe = User.getUserById(req.params.id)
 
     try {
         const user = await userModel
         const me = await userMe
-       
+
         if (!user || !me) {
             return res.status(404).send()
         }
         
         me.following.push(req.params.userId)
         user.followers.push(req.params.id)
+        
         await user.save()
         await me.save()
+        console.log(me)
         res.status(200).send(me)
     } catch (e) {
         res.status(400).send(e)
@@ -201,8 +310,8 @@ router.get('/users/:id/followers', async (req, res) => {
     try {
         const user = await User.findById(req.params.id)
 
-        if (!user || !user.followers) {
-            throw new Error()
+        if (!user) {
+            return res.status(404).send()
         }
 
         res.send(user.followers)
@@ -215,13 +324,13 @@ router.get('/users/:id/following', async (req, res) => {
     try {
         const user = await User.findById(req.params.id)
 
-        if (!user || !user.following) {
-            throw new Error()
+        if (!user) {
+            return res.status(404).send()
         }
 
         res.send(user.following)
     } catch (e) {
-        res.status(404).send()
+        res.status(400).send()
     }
 })
 
@@ -250,10 +359,7 @@ router.post('/user/:userId/unfollow/:id', async (req, res) => {
 
 router.post('/users/:id/hearts', auth, async (req, res) => {
    
-    const userModel = User.findById({
-        ...req.body,
-        _id: req.params.id,
-    })
+    const userModel = User.findById(req.params.id)
 
     try {
         const user = await userModel
@@ -261,6 +367,7 @@ router.post('/users/:id/hearts', auth, async (req, res) => {
         if (!user) {
             return res.status(404).send()
         }
+        
         const updates = req.body.hearts
         user.hearts = updates
         await user.save()

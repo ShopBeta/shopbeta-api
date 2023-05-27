@@ -21,10 +21,13 @@ router.post('/cart/:userId/product/:id', async (req, res) => {
 
  })
 
-  // Get all products in cart from database
-  router.get('/cart', async (req, res) => {
+  // Get all user's cart products in cart from database
+  router.get('/cart/:userId', async (req, res) => {
     try {
-        const cart = await Cart.find({})
+        const userId = req.params.userId
+
+        const cart = await Cart.getProductsByUserId(userId)
+
         res.send(cart.reverse())
     } catch (e) {
         res.status(500).send(e)
