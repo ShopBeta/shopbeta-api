@@ -34,7 +34,7 @@ router.get('/chat/:userId', async (req, res) => {
 
 router.get('/chat/messages/:roomId', async (req, res) => {
   try {
-    const { roomId } = req.params.roomId;
+    const roomId = req.params.roomId;
     const room = await ChatRoom.getChatRoomByRoomId(roomId)
     if (!room) {
       return res.status(400).json({
@@ -43,14 +43,14 @@ router.get('/chat/messages/:roomId', async (req, res) => {
       })
     }
 
-    const users = await User.getUserByIds(room.userIds);
     const options = {
       page: parseInt(req.query.page) || 0,
       limit: parseInt(req.query.limit) || 10,
     };
     
     const messages = await ChatMessage.getMessagesByRoomId(roomId)
-    res.send(messages)
+    res.status(200).send(messages)
+
     const conversation = await ChatMessage.getConversationByRoomId(roomId, options);
     // return res.status(200).json({
     //   success: true,

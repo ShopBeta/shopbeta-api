@@ -1,7 +1,12 @@
 const mongoose = require('mongoose')
+const fs = require('fs')
+const path = require('path')
+const avatar = path.join(__dirname, '../images/avatar.png')
+const file = fs.readFileSync(avatar, {encoding: 'utf-8'})
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const sharp = require('sharp')
 const Product = require('./products')
 
 const USER_TYPES = {
@@ -168,10 +173,21 @@ userSchema.pre('save', async function (next) {
     next()
 })
 
+// Default profile pic on signup
+userSchema.pre('save', async function (next) {
+    const user = this
+    const buffer = await sharp(avatar).resize({ width: 250, height: 250 }).png().toBuffer()
+
+    user.avatar = buffer
+
+    next()
+})
+
 // Delete user products when user is removed
 userSchema.pre('remove', async function(next) {
     const user = this
     await Product.deleteMany({ owner: user._id })
+
     next()
 })
 
