@@ -10,16 +10,10 @@ const feedSchema = new mongoose.Schema({
         text: {
             type: String,
             trim: true,
-            time: {
-                type: Date,
-                default: Date.now()
-            },
-            owner: {
-                type: mongoose.Schema.Types.ObjectId,
-            }
         },
-        file: {
-            type: Buffer
+        time: {
+            type: Date,
+            default: Date.now()
         },
         owner: {
             type: mongoose.Schema.Types.ObjectId,
@@ -55,16 +49,10 @@ const videoSchema = new mongoose.Schema({
         text: {
             type: String,
             trim: true,
-            time: {
-                type: Date,
-                default: Date.now()
-            },
-            owner: {
-                type: mongoose.Schema.Types.ObjectId,
-            }
         },
-        file: {
-            type: Buffer
+        time: {
+            type: Date,
+            default: Date.now()
         },
         owner: {
             type: mongoose.Schema.Types.ObjectId,

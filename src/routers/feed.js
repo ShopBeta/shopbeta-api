@@ -7,7 +7,6 @@ const router = new express.Router()
 
 // FEED ROUTERS
 
- // upload media file for a feed
 const imageUpload = multer({
     limits: {
         fileSize: 100000000
@@ -135,22 +134,8 @@ router.delete('/feed/:id', auth, async (req, res) => {
     }
 })
 
-//  upload media file as a comment
-const upload = multer({
-    limits: {
-        fileSize: 10000000
-    },
-    fileFilter(req, file, cb) {
-        if (!file.originalname.match(/\.(jpg|jpeg|png|mp4)$/)) {
-            return cb(new Error('Please upload a supported file format'))
-        }
-
-        cb(undefined, true)
-    }
-})
-
 // post comments
-router.post('/feed/:id/comments', upload.single('file'), async (req, res) => {
+router.post('/feed/:id/comments', async (req, res) => {
     const _id = req.params.id
    
     const feedModel = Feed.findById(_id)
@@ -162,8 +147,6 @@ router.post('/feed/:id/comments', upload.single('file'), async (req, res) => {
             return res.status(404).send()
         }
         const updates = req.body
-        // feed.comments[0].file = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()  
-        // feed.comments.push(feed.comments[0])
         feed.comments.push(updates)
         
         await feed.save()
