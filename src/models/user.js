@@ -173,15 +173,15 @@ userSchema.pre('save', async function (next) {
     next()
 })
 
-// Default profile pic on signup
-userSchema.pre('save', async function (next) {
+
+userSchema.methods.generateAvatar = async function () {
     const user = this
     const buffer = await sharp(avatar).resize({ width: 250, height: 250 }).png().toBuffer()
 
     user.avatar = buffer
+    await user.save()
+}
 
-    next()
-})
 
 // Delete user products when user is removed
 userSchema.pre('remove', async function(next) {
