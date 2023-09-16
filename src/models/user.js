@@ -1,0 +1,242 @@
+const mongoose = require('mongoose')
+const fs = require('fs')
+const path = require('path')
+const avatar = path.join(__dirname, '../images/avatar.png')
+const file = fs.readFileSync(avatar, {encoding: 'utf-8'})
+const validator = require('validator')
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+const sharp = require('sharp')
+const Product = require('./products')
+
+const USER_TYPES = {
+    CONSUMER: "consumer",
+    SUPPORT: "support",
+}
+
+const userSchema = new mongoose.Schema({
+    username: {
+        type: String,
+        minLenght: 15,
+        required: true,
+        trim: true
+    },
+    email: {
+        type: String,
+        unique: true,
+        required: true,
+        trim: true,
+        lowercase: true,
+        validate(value) {
+            if (!validator.isEmail(value)) {
+                throw new Error('Email is invalid')
+            }
+        }
+    },
+    password: {
+        type: String,
+        required: true,
+        minLenght: 7,
+        trim: true, 
+        validate(value) {
+            if (value.toLowerCase().includes('password')) {
+                throw new Error('Password cannot contain "password"')
+            }
+        }
+    },
+    phonenumber: {
+        type: Number,
+        trim: true,
+    },
+    bio: {
+        type: String,
+        minLenght: 150
+    },
+    hearts: {
+        type: Number,
+        default: 0
+    },
+    following: {
+        type: Array,
+        default: undefined
+    },
+    followers:{
+        type: Array,
+        default: undefined
+    },
+    location: {
+        type: String,
+        trim: true,
+    },
+    link: {
+        type: String,
+        trim: true,
+        validate(value) {
+           return value.toLowerCase()
+        }
+    }, 
+    token: [{
+        token: {
+            type: String,
+            required: true,
+        }
+        
+    }],
+    avatar: {
+        type: Buffer
+    }
+}, {
+    timestamps: true
+})
+
+userSchema.virtual('products', {
+    ref: 'Product',
+    localField: '_id',
+    foreignField: 'owner'
+})
+
+userSchema.virtual('feed', {
+    ref: 'Feed',
+    localField: '_id',
+    foreignField: 'owner'
+})
+
+userSchema.virtual('video', {
+    ref: 'Video',
+    localField: '_id',
+    foreignField: 'owner'
+})
+
+userSchema.virtual('cart', {
+    ref: 'Cart',
+    localField: '_id',
+    foreignField: 'owner'
+})
+
+userSchema.methods.toJSON = function () {
+    const user = this
+    const userObject = user.toObject()
+
+    delete userObject.password
+    delete userObject.token
+    delete userObject.followers
+    delete userObject.following
+
+    return userObject
+}
+
+userSchema.methods.generateAuthToken = async function () {
+    const user = this
+    const token = jwt.sign({_id: user._id.toString() }, process.env.JWT_SECRET)
+
+    user.token = user.token.concat({ token })
+    await user.save()
+
+    return token
+}
+
+userSchema.statics.findByCredentials = async (email, password) => {
+    const user = await User.findOne({ email })
+
+    if (!user) {
+        throw new Error('Unable to login')
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password)
+
+    if (!isMatch) {
+        throw new Error('Unable to login')
+    }
+
+    return user
+}
+
+// Hash the plain text password before saving
+userSchema.pre('save', async function (next) {
+    const user = this
+
+    if (user.isModified('password')) {
+        user.password = await bcrypt.hash(user.password, 8)
+    }
+
+    next()
+})
+
+
+userSchema.methods.generateAvatar = async function () {
+    const user = this
+    const buffer = await sharp(avatar).resize({ width: 250, height: 250 }).png().toBuffer()
+
+    user.avatar = buffer
+    await user.save()
+}
+
+
+// Delete user products when user is removed
+userSchema.pre('remove', async function(next) {
+    const user = this
+    await Product.deleteMany({ owner: user._id })
+
+    next()
+})
+
+  
+  /**
+   * @param {String} id, user id
+   * @return {Object} User profile object
+   */
+  userSchema.statics.getUserById = async function (id) {
+    try {
+      const user = await this.findOne({ _id: id });
+      if (!user) throw ({ error: 'No user with this id found' });
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
+  
+  /**
+   * @return {Array} List of all users
+   */
+  userSchema.statics.getUsers = async function () {
+    try {
+      const users = await this.find();
+      return users;
+    } catch (error) {
+      throw error;
+    }
+  }
+  
+  /**
+   * @param {Array} ids, string of user ids
+   * @return {Array of Objects} users list
+   */
+  userSchema.statics.getUserByIds = async function (ids) {
+    try {
+      const users = await this.find({ _id: { $in: ids } });
+      return users;
+    } catch (error) {
+      throw error;
+    }
+  }
+  
+  /**
+   * @param {String} id - id of user
+   * @return {Object} - details of action performed
+   */
+  userSchema.statics.deleteByUserById = async function (id) {
+    try {
+      const result = await this.remove({ _id: id });
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+  
+
+const User = mongoose.model('User', userSchema )
+
+module.exports = {
+    User,
+    USER_TYPES
+}
