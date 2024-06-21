@@ -243,7 +243,7 @@ router.post('/users/:id/avatar', upload.single('avatar'), async (req, res) => {
     const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
     user.avatar = buffer
     await user.save()
-    res.redirect('https://shopbeta-online.onrender.com/assets/vendor/Profile')
+    res.redirect('https://shopbeta-online.onrender.com/assets/Adbillboard')
 }, (error, req, res, next) => {
     res.status(400).send({ error: error.message })
 })
