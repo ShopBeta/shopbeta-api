@@ -1,3 +1,26 @@
-# shopbeta-api
+### 🛠️ **ShopBeta – API Backend**
 
-ShopBeta is an innovative marketplace,that provided you with an unparallel shopping experience. Transforming your experience with wide selections of merchandise, flexible preferences, powerful tools, and a vibrant community of social shoppers. Join to buy and sell on ShopBeta Social now.
+```markdown
+# ShopBeta API
+
+The backend engine for the ShopBeta social commerce platform. Handles user auth, product data, social interactions, and transactions.
+
+## Features
+- Product CRUD and inventory
+- Social actions (likes, comments)
+- Secure user authentication
+- Checkout & order flow
+
+## Tech Stack
+- MongoDB
+- Express.js
+- Node.js
+- JWT & Stripe (or similar) integration
+
+## Getting Started
+
+```bash
+git clone https://github.com/yourusername/shopbeta-api.git
+cd shopbeta-api
+npm install
+npm start
